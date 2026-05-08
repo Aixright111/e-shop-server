@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i 's/mysql-connector-j/postgresql/' pom.xml)",
+      "Bash(sed -i 's/mysql驱动/postgresql驱动/' pom.xml)"
+    ]
+  }
+}
