@@ -25,6 +25,7 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
+  type-handlers-package: com.example.e_shop.handler
 # 定义角色和路径权限的映射关系
 role-path-permissions:
   permissions:

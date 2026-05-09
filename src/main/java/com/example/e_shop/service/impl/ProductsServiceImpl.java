@@ -7,10 +7,13 @@ import com.example.e_shop.DTO.AddProductsDTO;
 import com.example.e_shop.DTO.GetProductsDTO;
 import com.example.e_shop.VO.ProductsDetailsVO;
 import com.example.e_shop.VO.ProductsVO;
+import com.example.e_shop.VO.UserVO;
 import com.example.e_shop.constant.JwtClaimsConstant;
 import com.example.e_shop.constant.MessageConstant;
 import com.example.e_shop.entity.Products;
+import com.example.e_shop.entity.User;
 import com.example.e_shop.mapper.ProductsMapper;
+import com.example.e_shop.mapper.UserMapper;
 import com.example.e_shop.result.PageResult;
 import com.example.e_shop.result.Result;
 import com.example.e_shop.service.ProductsService;
@@ -36,7 +39,9 @@ import java.util.Map;
 public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> implements ProductsService {
            @Autowired
            ProductsMapper productsMapper;
-    public Result addProducts(AddProductsDTO addProductsDTO){
+           @Autowired
+           UserMapper userMapper;
+           public Result addProducts(AddProductsDTO addProductsDTO){
         Map<String, Object> map = ThreadLocalUtil.get();
         Object userIdObj = map.get(JwtClaimsConstant.USER_ID);
         Long userId = TypeConversionUtil.toLong(userIdObj);
@@ -74,9 +79,17 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         if(products==null){
             return Result.error(MessageConstant.FAILED);
         }
+
         else {
+            User user=userMapper.selectById(products.getUserId());
+            UserVO userVO=new UserVO();
+
+            BeanUtils.copyProperties(user,userVO);
+           userVO.setAvatarUrl(user.getUserImage());
             ProductsDetailsVO productsDetailsVO=new ProductsDetailsVO();
             BeanUtils.copyProperties(products, productsDetailsVO);
+            productsDetailsVO.setUserName(user.getName());
+            productsDetailsVO.setUserVO(userVO);
             return Result.success(MessageConstant.SUCCESS,productsDetailsVO);
         }
 

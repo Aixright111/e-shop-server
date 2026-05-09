@@ -20,6 +20,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -75,8 +76,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = userMapper.selectById(userId);
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
-        System.out.println(userVO.getName());
+        userVO.setAvatarUrl(user.getUserImage());
         return Result.success(userVO);
-
     }
+    public Result updateUserinfo(UserDTO userDTO){
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Object userIdObj = map.get(JwtClaimsConstant.USER_ID);
+        Long userId = TypeConversionUtil.toLong(userIdObj);
+        System.out.println(userId);
+        User user = userMapper.selectById(userId);
+        user.setId(userId);
+        user.setName(userDTO.getUsername());
+        user.setEmail(userDTO.getEmail());
+        user.setUserImage(userDTO.getAvatarUrl());
+        System.out.println(userDTO.getAvatarUrl());
+        user.setUpdatedAt(LocalDateTime.now());
+        if(userMapper.updateById(user)==0){
+            return Result.error(MessageConstant.FAILED);
+        }
+        else return Result.success(MessageConstant.SUCCESS);
+    }
+
 }

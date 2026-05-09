@@ -11,4 +11,5 @@ public class UserVO {
     private String email;
     private Long id;
     private LocalDateTime createdAt;
+    private String avatarUrl;
 }

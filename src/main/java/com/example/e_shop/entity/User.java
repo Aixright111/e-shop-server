@@ -50,6 +50,8 @@ public class User implements Serializable {
      * 创建时间
      */
     private LocalDateTime createdAt;
+//    头像url
+    private String userImage;
 
     /**
      * 更新时间

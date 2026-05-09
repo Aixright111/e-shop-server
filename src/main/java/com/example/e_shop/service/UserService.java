@@ -17,4 +17,5 @@ public interface UserService extends IService<User> {
      Result register(UserDTO userDTO);
      Result login(UserDTO userDTO);
      Result getUserinfo();
+     Result updateUserinfo(UserDTO userDTO);
 }

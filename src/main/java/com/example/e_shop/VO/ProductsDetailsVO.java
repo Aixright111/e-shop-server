@@ -14,4 +14,5 @@ public class ProductsDetailsVO {
     private BigDecimal price;
     private String description;
     private LocalDateTime createdAt;
+    private UserVO userVO;
 }

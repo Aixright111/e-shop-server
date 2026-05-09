@@ -35,4 +35,8 @@ public class UserController {
     public Result<UserVO> getInfo(){
         return userService.getUserinfo();
     }
+    @PutMapping("/update")
+    public  Result updateUserInfo(@RequestBody UserDTO userDTO){
+        return userService.updateUserinfo(userDTO);
+    }
 }
