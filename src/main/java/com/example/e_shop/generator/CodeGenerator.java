@@ -32,7 +32,7 @@ public class CodeGenerator {
                             ));
                 })
                 .strategyConfig(builder -> {
-                    builder.addInclude("conversations")
+                    builder.addInclude("transactionrecords")
                             .entityBuilder()
                             .enableLombok()
                             .enableFileOverride() // 这一行是关键！对所有文件开启覆盖
