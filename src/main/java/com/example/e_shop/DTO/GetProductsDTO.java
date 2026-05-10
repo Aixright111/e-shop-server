@@ -6,6 +6,5 @@ import lombok.Data;
 public class GetProductsDTO {
  private Integer PageSize;
  private Integer pageNum;
-
-
+ private Long userId;
 }

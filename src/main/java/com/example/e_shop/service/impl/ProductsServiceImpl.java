@@ -35,6 +35,7 @@ import java.util.Map;
  * @author e-shop
  * @since 2026-05-08
  */
+
 @Service
 public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> implements ProductsService {
            @Autowired
@@ -49,6 +50,8 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         products.setName(addProductsDTO.getName());
         products.setImageUrl(addProductsDTO.getImageUrl());
         products.setPrice(addProductsDTO.getPrice());
+        System.out.println(addProductsDTO.getDescription());
+        products.setDescription(addProductsDTO.getDescription());
         products.setUserId(userId);
         if(productsMapper.insert(products)==0){
             return Result.error(MessageConstant.ADD+MessageConstant.FAILED);
@@ -60,6 +63,9 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         Page<Products> page=new Page<>(getProductsDTO.getPageNum(),getProductsDTO.getPageSize());
         QueryWrapper queryWrapper=new QueryWrapper<>();
         // 分页查询
+        if(getProductsDTO.getUserId()!=null){
+            queryWrapper.eq("user_id",getProductsDTO.getUserId());
+        }
         IPage<Products> productsIPage = productsMapper.selectPage(page, queryWrapper);
         if (productsIPage.getRecords().size() == 0) {
             return Result.success(MessageConstant.DATA_NOT_FOUND, new PageResult<>(0L, null));
@@ -93,5 +99,15 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
             return Result.success(MessageConstant.SUCCESS,productsDetailsVO);
         }
 
+    }
+    public Result deleteProducts(Long productId){
+         Products products=productsMapper.selectById(productId);
+
+         String productsImageUrl=products.getImageUrl();
+        System.out.println(productsImageUrl);
+         if(productsMapper.deleteById(productId)==0){
+             return Result.error(MessageConstant.FAILED);
+         }
+         else return Result.success(MessageConstant.SUCCESS,productsImageUrl);
     }
 }

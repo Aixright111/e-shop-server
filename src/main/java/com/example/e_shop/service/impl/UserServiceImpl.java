@@ -96,5 +96,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         else return Result.success(MessageConstant.SUCCESS);
     }
+    public Result<UserVO> getUserInfoById(Long userId){
+        UserVO userVO=new UserVO();
+        User user=userMapper.selectById(userId);
+        if (user!=null)System.out.println("没获取userbyid");
+        BeanUtils.copyProperties(user,userVO);
+        userVO.setAvatarUrl(user.getUserImage());
+        if(userVO!=null)
+        return Result.success(MessageConstant.SUCCESS,userVO);
+        else return Result.error(MessageConstant.FAILED);
+    }
 
 }

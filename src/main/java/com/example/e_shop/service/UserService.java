@@ -1,6 +1,7 @@
 package com.example.e_shop.service;
 
 import com.example.e_shop.DTO.UserDTO;
+import com.example.e_shop.VO.UserVO;
 import com.example.e_shop.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.e_shop.result.Result;
@@ -18,4 +19,5 @@ public interface UserService extends IService<User> {
      Result login(UserDTO userDTO);
      Result getUserinfo();
      Result updateUserinfo(UserDTO userDTO);
+     Result<UserVO> getUserInfoById(Long userId);
 }

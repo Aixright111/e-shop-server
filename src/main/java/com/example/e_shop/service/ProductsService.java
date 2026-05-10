@@ -18,4 +18,5 @@ public interface ProductsService extends IService<Products> {
     Result addProducts(AddProductsDTO addProductsDTO);
     Result getProducts(GetProductsDTO getProductsDTO);
     Result getProductsDetails(Long productId);
+    Result deleteProducts(Long productId);
 }

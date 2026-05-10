@@ -39,4 +39,9 @@ public class UserController {
     public  Result updateUserInfo(@RequestBody UserDTO userDTO){
         return userService.updateUserinfo(userDTO);
     }
+    @GetMapping("/getInfoById/{userId}")
+    public  Result<UserVO> getInfoById( @PathVariable Long userId){
+        System.out.println("getInfoById");
+        return  userService.getUserInfoById(userId);
+    }
 }
