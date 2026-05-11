@@ -1,6 +1,7 @@
 package com.example.e_shop.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
@@ -41,4 +42,8 @@ public class Transactionrecords implements Serializable {
     private LocalDateTime transactiontime;
 
     private LocalDateTime transactiondeadline;
+    @TableField("is_commit")
+    private Boolean isCommit;
+    @TableField("is_pay")
+    private Boolean isPay;
 }

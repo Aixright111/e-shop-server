@@ -1,7 +1,9 @@
 package com.example.e_shop.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.e_shop.DTO.TransactionDTO;
 import com.example.e_shop.VO.TransactionVO;
+import com.example.e_shop.constant.JwtClaimsConstant;
 import com.example.e_shop.constant.MessageConstant;
 import com.example.e_shop.entity.Products;
 import com.example.e_shop.entity.Transactionrecords;
@@ -10,6 +12,8 @@ import com.example.e_shop.mapper.TransactionrecordsMapper;
 import com.example.e_shop.result.Result;
 import com.example.e_shop.service.TransactionrecordsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.e_shop.util.ThreadLocalUtil;
+import com.example.e_shop.util.TypeConversionUtil;
 import org.apache.ibatis.transaction.Transaction;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +23,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * <p>
@@ -68,5 +74,70 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
                     return transactionVO;
         } ).toList();
         return Result.success(MessageConstant.SUCCESS,transactionVOList);
+    }
+    public Result<List<TransactionVO>> getSellerRecords(Long userId){
+        QueryWrapper queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("sellerid",userId);
+        List<Transactionrecords> transactionrecordsList=  transactionrecordsMapper.selectList(queryWrapper);
+        List<TransactionVO> transactionVOList= transactionrecordsList.stream().map(
+                transactionrecords ->{
+                    Long productsId=transactionrecords.getProductid();
+                    Products products=productsMapper.selectById(productsId);
+                    TransactionVO transactionVO=new TransactionVO();
+                    BeanUtils.copyProperties(transactionrecords,transactionVO);
+                    transactionVO.setName(products.getName());
+
+                    Duration duration = Duration.between(transactionrecords.getTransactiontime(), transactionrecords.getTransactiondeadline());
+                    long hours = duration.toHours();
+                    transactionVO.setImageUrl(products.getImageUrl());
+                    transactionVO.setHours(hours);
+                    return transactionVO;
+                } ).toList();
+        return Result.success(transactionVOList);
+    }
+    public Result<List<TransactionVO>> getBuyerRecords(Long userId){
+        QueryWrapper queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("buyerid",userId);
+        List<Transactionrecords> transactionrecordsList=  transactionrecordsMapper.selectList(queryWrapper);
+        List<TransactionVO> transactionVOList= transactionrecordsList.stream().map(
+                transactionrecords ->{
+                    Long productsId=transactionrecords.getProductid();
+                    Products products=productsMapper.selectById(productsId);
+                    TransactionVO transactionVO=new TransactionVO();
+                    BeanUtils.copyProperties(transactionrecords,transactionVO);
+                    transactionVO.setName(products.getName());
+
+                    Duration duration = Duration.between(transactionrecords.getTransactiontime(), transactionrecords.getTransactiondeadline());
+                    long hours = duration.toHours();
+                    transactionVO.setImageUrl(products.getImageUrl());
+                    transactionVO.setHours(hours);
+                    return transactionVO;
+                } ).toList();
+        return Result.success(transactionVOList);
+    }
+    public Result commitOrders(Long id){
+        Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
+        transactionrecords.setIsCommit(true);
+        transactionrecordsMapper.updateById(transactionrecords);
+        return Result.success(MessageConstant.SUCCESS);
+    }
+    public Result payOrders(Long id){
+        Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
+        transactionrecords.setIsPay(true);
+        transactionrecordsMapper.updateById(transactionrecords);
+        return Result.success(MessageConstant.SUCCESS);
+    }
+    public Result<TransactionVO> getOrdersDetail(Long id){
+        Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
+        Long productsId=transactionrecords.getProductid();
+        Products products=productsMapper.selectById(productsId);
+        TransactionVO transactionVO=new TransactionVO();
+        BeanUtils.copyProperties(transactionrecords,transactionVO);
+        transactionVO.setName(products.getName());
+        Duration duration = Duration.between(transactionrecords.getTransactiontime(), transactionrecords.getTransactiondeadline());
+        long hours = duration.toHours();
+        transactionVO.setImageUrl(products.getImageUrl());
+        transactionVO.setHours(hours);
+        return Result.success(transactionVO);
     }
 }

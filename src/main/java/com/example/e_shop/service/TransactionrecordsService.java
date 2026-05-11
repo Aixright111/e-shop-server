@@ -19,4 +19,9 @@ import java.util.List;
 public interface TransactionrecordsService extends IService<Transactionrecords> {
     Result addTransactionRecords(TransactionDTO transactionDTO);
     Result <List<TransactionVO>> getTransactionRecords(Long userId, Long otherId);
+    Result<List<TransactionVO>> getSellerRecords(Long userId);
+    Result<List<TransactionVO>> getBuyerRecords(Long userId);
+    Result commitOrders(Long id);
+    Result payOrders(Long id);
+    Result <TransactionVO> getOrdersDetail(Long id);
 }
