@@ -48,4 +48,8 @@ public class Products implements Serializable {
     private Long typeId;
 
     private Long userId;
+
+    @TableField("detailviews")
+
+    private Long detailView;
 }

@@ -20,6 +20,7 @@ import com.example.e_shop.service.ProductsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.e_shop.util.ThreadLocalUtil;
 import com.example.e_shop.util.TypeConversionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import java.util.Map;
  */
 
 @Service
+@Slf4j
 public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> implements ProductsService {
            @Autowired
            ProductsMapper productsMapper;
@@ -93,11 +95,12 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
 
         else {
+            productsMapper.incrementDetailView(products);
             User user=userMapper.selectById(products.getUserId());
             UserVO userVO=new UserVO();
 
             BeanUtils.copyProperties(user,userVO);
-           userVO.setAvatarUrl(user.getUserImage());
+            userVO.setAvatarUrl(user.getUserImage());
             ProductsDetailsVO productsDetailsVO=new ProductsDetailsVO();
             BeanUtils.copyProperties(products, productsDetailsVO);
             productsDetailsVO.setUserName(user.getName());

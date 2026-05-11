@@ -12,5 +12,5 @@ import com.example.e_shop.entity.Products;
  * @since 2026-05-08
  */
 public interface ProductsMapper extends BaseMapper<Products> {
-
+    void incrementDetailView(Products products);
 }

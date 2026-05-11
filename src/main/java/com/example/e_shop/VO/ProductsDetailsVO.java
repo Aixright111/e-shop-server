@@ -16,4 +16,5 @@ public class ProductsDetailsVO {
     private LocalDateTime createdAt;
     private UserVO userVO;
     private Long typeId;
+    private Long detailView;
 }

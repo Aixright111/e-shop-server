@@ -11,6 +11,8 @@ public class ProductsVO {
 
     private Long id;
 
+    private Long userId;
+
     private BigDecimal price;
 
     private String imageUrl;
@@ -22,6 +24,8 @@ public class ProductsVO {
     private Boolean show;
 
     private String typeName;
+
+    private Long detailView;
 
     private Long typeId;
 
