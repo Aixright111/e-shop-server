@@ -50,6 +50,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         products.setName(addProductsDTO.getName());
         products.setImageUrl(addProductsDTO.getImageUrl());
         products.setPrice(addProductsDTO.getPrice());
+        products.setTypeId(addProductsDTO.getTypeId());
         System.out.println(addProductsDTO.getDescription());
         products.setDescription(addProductsDTO.getDescription());
         products.setUserId(userId);
@@ -66,6 +67,9 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         if(getProductsDTO.getUserId()!=null){
             queryWrapper.eq("user_id",getProductsDTO.getUserId());
         }
+        if(getProductsDTO.getTypeId()!=null){
+            queryWrapper.eq("typeId",getProductsDTO.getTypeId());
+        }
         IPage<Products> productsIPage = productsMapper.selectPage(page, queryWrapper);
         if (productsIPage.getRecords().size() == 0) {
             return Result.success(MessageConstant.DATA_NOT_FOUND, new PageResult<>(0L, null));
@@ -73,10 +77,12 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         // 转换成 ProductsVO
         List<ProductsVO> productsVOList = productsIPage.getRecords().stream()
                 .map(products -> {
-                    ProductsVO productsVO = new ProductsVO();
-                    BeanUtils.copyProperties(products, productsVO);
-                    return productsVO;
-                }).toList();
+                            ProductsVO productsVO = new ProductsVO();
+                            BeanUtils.copyProperties(products, productsVO);
+                            return productsVO;
+
+                        }
+                ).toList();
         return Result.success(new PageResult<>(productsIPage.getTotal(), productsVOList));
     }
     public Result getProductsDetails(Long productId){

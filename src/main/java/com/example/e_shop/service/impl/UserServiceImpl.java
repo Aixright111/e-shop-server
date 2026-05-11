@@ -45,6 +45,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setEmail(userDTO.getEmail());
         String passwordMD5 = DigestUtils.md5DigestAsHex(userDTO.getPassword().getBytes());
         user.setPassword(passwordMD5);
+        user.setName(userDTO.getUsername());
         if (userMapper.insert(user) == 0)
             return Result.error(MessageConstant.REGISTER + MessageConstant.FAILED);
         else

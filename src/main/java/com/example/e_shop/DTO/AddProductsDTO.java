@@ -10,4 +10,5 @@ public class AddProductsDTO {
     private BigDecimal price ;
     private String imageUrl ;
     private String description;
+    private Long typeId;
 }

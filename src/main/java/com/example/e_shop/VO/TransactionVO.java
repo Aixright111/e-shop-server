@@ -16,6 +16,8 @@ public class TransactionVO {
 
     private Long productId;
 
+    private UserVO userVO;
+
     private Long price;
 
     private String name;
@@ -31,6 +33,6 @@ public class TransactionVO {
     private  Long hours;
 
     private String imageUrl;
-
+    private Boolean isExpired;
     private LocalDateTime transactiondeadline;
 }

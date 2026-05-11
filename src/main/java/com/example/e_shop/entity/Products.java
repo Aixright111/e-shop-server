@@ -1,6 +1,7 @@
 package com.example.e_shop.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,6 +40,12 @@ public class Products implements Serializable {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    private Boolean show;
+    @TableField("typename")
+    private String typeName;
+    @TableField("typeid")
+    private Long typeId;
 
     private Long userId;
 }

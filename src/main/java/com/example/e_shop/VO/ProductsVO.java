@@ -8,7 +8,9 @@ import java.time.LocalDateTime;
 @Data
 public class ProductsVO {
     private String name;
+
     private Long id;
+
     private BigDecimal price;
 
     private String imageUrl;
@@ -17,5 +19,10 @@ public class ProductsVO {
 
     private LocalDateTime createdAt;
 
+    private Boolean show;
+
+    private String typeName;
+
+    private Long typeId;
 
 }

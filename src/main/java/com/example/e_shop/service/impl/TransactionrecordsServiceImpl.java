@@ -3,12 +3,15 @@ package com.example.e_shop.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.e_shop.DTO.TransactionDTO;
 import com.example.e_shop.VO.TransactionVO;
+import com.example.e_shop.VO.UserVO;
 import com.example.e_shop.constant.JwtClaimsConstant;
 import com.example.e_shop.constant.MessageConstant;
 import com.example.e_shop.entity.Products;
 import com.example.e_shop.entity.Transactionrecords;
+import com.example.e_shop.entity.User;
 import com.example.e_shop.mapper.ProductsMapper;
 import com.example.e_shop.mapper.TransactionrecordsMapper;
+import com.example.e_shop.mapper.UserMapper;
 import com.example.e_shop.result.Result;
 import com.example.e_shop.service.TransactionrecordsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -19,6 +22,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.awt.desktop.SystemEventListener;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -40,7 +44,8 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
     TransactionrecordsMapper transactionrecordsMapper;
     @Autowired
     ProductsMapper productsMapper;
-
+    @Autowired
+    UserMapper userMapper;
     public Result addTransactionRecords(TransactionDTO transactionDTO){
                  Transactionrecords transactionrecords=new Transactionrecords();
                  transactionrecords.setProductid(transactionDTO.getProductId());
@@ -118,6 +123,9 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
     public Result commitOrders(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         transactionrecords.setIsCommit(true);
+        Products products=productsMapper.selectById(transactionrecords.getProductid());
+        products.setShow(false);
+        productsMapper.updateById(products);
         transactionrecordsMapper.updateById(transactionrecords);
         return Result.success(MessageConstant.SUCCESS);
     }
@@ -132,7 +140,19 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
         Long productsId=transactionrecords.getProductid();
         Products products=productsMapper.selectById(productsId);
         TransactionVO transactionVO=new TransactionVO();
+        Map<String, Object> map = ThreadLocalUtil.get();
+        Object userIdObj = map.get(JwtClaimsConstant.USER_ID);
+        Long userId = TypeConversionUtil.toLong(userIdObj);
+        User user=new User();
+        if(userId==transactionrecords.getSellerid()){
+           user = userMapper.selectById(transactionrecords.getBuyerid());
+        }
+        else{ user = userMapper.selectById(transactionrecords.getSellerid());}
+        UserVO userVO =new UserVO();
+        BeanUtils.copyProperties(user,userVO);
+        userVO.setAvatarUrl(user.getUserImage());
         BeanUtils.copyProperties(transactionrecords,transactionVO);
+        transactionVO.setUserVO(userVO);
         transactionVO.setName(products.getName());
         Duration duration = Duration.between(transactionrecords.getTransactiontime(), transactionrecords.getTransactiondeadline());
         long hours = duration.toHours();
