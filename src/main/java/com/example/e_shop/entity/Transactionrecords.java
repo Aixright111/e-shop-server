@@ -48,4 +48,6 @@ public class Transactionrecords implements Serializable {
     private Boolean isPay;
     @TableField("is_expired")
     private Boolean isExpired;
+    @TableField("is_reject")
+    private Boolean isReject;
 }

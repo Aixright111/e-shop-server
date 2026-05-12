@@ -25,7 +25,7 @@ public class TransactionVO {
     private BigDecimal amount;
 
     private Boolean isCommit;
-
+    private Boolean isReject;
     private Boolean isPay;
 
     private LocalDateTime transactiontime;

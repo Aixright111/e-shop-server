@@ -129,9 +129,19 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
         transactionrecordsMapper.updateById(transactionrecords);
         return Result.success(MessageConstant.SUCCESS);
     }
+    public Result rejectOrders(Long id){
+        Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
+        transactionrecords.setIsReject(true);
+        Products products=productsMapper.selectById(transactionrecords.getProductid());
+        products.setShow(true);
+        productsMapper.updateById(products);
+        transactionrecordsMapper.updateById(transactionrecords);
+        return Result.success(MessageConstant.SUCCESS);
+    }
     public Result payOrders(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         transactionrecords.setIsPay(true);
+        transactionrecords.setTransactiondeadline( LocalDateTime.now().plusHours(720));
         transactionrecordsMapper.updateById(transactionrecords);
         return Result.success(MessageConstant.SUCCESS);
     }

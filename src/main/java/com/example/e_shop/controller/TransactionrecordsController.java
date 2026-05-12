@@ -53,4 +53,8 @@ public class TransactionrecordsController {
    public  Result commitOrder(@PathVariable("orderId") Long orderId){
        return  transactionrecordsService.commitOrders(orderId);
 }
+    @PutMapping("reject/{orderId}")
+    public  Result rejectOrder(@PathVariable("orderId") Long orderId){
+        return  transactionrecordsService.rejectOrders(orderId);
+    }
 }

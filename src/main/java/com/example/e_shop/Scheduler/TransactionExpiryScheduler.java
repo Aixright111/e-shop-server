@@ -23,7 +23,7 @@ public class TransactionExpiryScheduler {
     /**
      * 每分钟执行一次，标记过期订单
      */
-    @Scheduled(fixedDelay = 20000)  // 60秒
+    @Scheduled(fixedDelay = 20000)  // 20s标记过期订单
     @Transactional
     public void markExpiredTransactions() {
         // 在 Java 中获取当前时间
@@ -41,6 +41,22 @@ public class TransactionExpiryScheduler {
             log.info("标记了 {} 个订单为过期状态", updated);
         } else {
             log.info("订单无过期");
+        }
+    }
+    @Scheduled(fixedDelay = 30000, initialDelay = 60000)  // 60秒首次删除过期订单 30s/次
+    @Transactional
+    public void deleteTransactions(){
+        String sql = """
+        DELETE FROM transactionrecords 
+        WHERE is_expired = TRUE 
+         OR is_reject = TRUE
+        """;
+
+        int updated = jdbcTemplate.update(sql);
+        if (updated > 0) {
+            log.info("删除了 {} 个订单", updated);
+        } else {
+            log.info("0个删除");
         }
     }
 }

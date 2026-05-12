@@ -5,14 +5,17 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.e_shop.DTO.AddProductsDTO;
 import com.example.e_shop.DTO.GetProductsDTO;
+import com.example.e_shop.DTO.UpdateProductsDTO;
 import com.example.e_shop.VO.ProductsDetailsVO;
 import com.example.e_shop.VO.ProductsVO;
 import com.example.e_shop.VO.UserVO;
 import com.example.e_shop.constant.JwtClaimsConstant;
 import com.example.e_shop.constant.MessageConstant;
 import com.example.e_shop.entity.Products;
+import com.example.e_shop.entity.Transactionrecords;
 import com.example.e_shop.entity.User;
 import com.example.e_shop.mapper.ProductsMapper;
+import com.example.e_shop.mapper.TransactionrecordsMapper;
 import com.example.e_shop.mapper.UserMapper;
 import com.example.e_shop.result.PageResult;
 import com.example.e_shop.result.Result;
@@ -44,6 +47,8 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
            ProductsMapper productsMapper;
            @Autowired
            UserMapper userMapper;
+           @Autowired
+    TransactionrecordsMapper transactionrecordsMapper;
            public Result addProducts(AddProductsDTO addProductsDTO){
         Map<String, Object> map = ThreadLocalUtil.get();
         Object userIdObj = map.get(JwtClaimsConstant.USER_ID);
@@ -111,12 +116,45 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
     }
     public Result deleteProducts(Long productId){
          Products products=productsMapper.selectById(productId);
+        QueryWrapper queryWrapper =new QueryWrapper<>();
+        queryWrapper.eq("productid",products.getId());
+        List<Transactionrecords> transactionrecordsList=  transactionrecordsMapper.selectList(queryWrapper);
+        if(transactionrecordsList!=null){
 
+            for(Transactionrecords transactionrecords:transactionrecordsList){
+                if(transactionrecords.getIsCommit()==true&&transactionrecords.getIsExpired()==false){
+                    return  Result.error("处于确认订单状态的商品无法下架");
+                }
+            }
+
+        }
          String productsImageUrl=products.getImageUrl();
-        System.out.println(productsImageUrl);
+
          if(productsMapper.deleteById(productId)==0){
              return Result.error(MessageConstant.FAILED);
          }
          else return Result.success(MessageConstant.SUCCESS,productsImageUrl);
+    }
+    public Result updateProducts(UpdateProductsDTO updateProductsDTO){
+               Products products = productsMapper.selectById(updateProductsDTO.getId());
+               QueryWrapper queryWrapper =new QueryWrapper<>();
+               queryWrapper.eq("productid",products.getId());
+              List<Transactionrecords> transactionrecordsList=  transactionrecordsMapper.selectList(queryWrapper);
+              if(transactionrecordsList!=null){
+
+                  for(Transactionrecords transactionrecords:transactionrecordsList){
+                      if(transactionrecords.getIsCommit()==true&&transactionrecords.getIsExpired()==false){
+                          return  Result.error("处于确认订单状态的商品无法修改");
+                      }
+                  }
+
+              }
+               if(products!=null){
+                   BeanUtils.copyProperties(updateProductsDTO,products);
+               }
+              if( productsMapper.updateById(products)==0)
+               return  Result.error();
+                   else
+                       return Result.success();
     }
 }

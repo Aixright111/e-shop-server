@@ -22,6 +22,7 @@ public interface TransactionrecordsService extends IService<Transactionrecords> 
     Result<List<TransactionVO>> getSellerRecords(Long userId);
     Result<List<TransactionVO>> getBuyerRecords(Long userId);
     Result commitOrders(Long id);
+    Result rejectOrders(Long id);
     Result payOrders(Long id);
     Result <TransactionVO> getOrdersDetail(Long id);
 }

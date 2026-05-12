@@ -2,6 +2,7 @@ package com.example.e_shop.controller;
 
 import com.example.e_shop.DTO.AddProductsDTO;
 import com.example.e_shop.DTO.GetProductsDTO;
+import com.example.e_shop.DTO.UpdateProductsDTO;
 import com.example.e_shop.VO.ProductsVO;
 import com.example.e_shop.result.PageResult;
 import com.example.e_shop.result.Result;
@@ -38,5 +39,9 @@ public class ProductsController {
     public Result deleteProducts(@PathVariable("productsId") Long productsId){
 
         return  productsService.deleteProducts(productsId);
+   }
+   @PutMapping("/update")
+    public  Result updateProducts(@RequestBody UpdateProductsDTO updateProductsDTO){
+        return productsService.updateProducts(updateProductsDTO);
    }
 }
