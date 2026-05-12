@@ -3,6 +3,7 @@ package com.example.e_shop.Scheduler;
 import com.example.e_shop.mapper.TransactionrecordsMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,6 @@ public class TransactionExpiryScheduler {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
     private TransactionrecordsMapper transactionMapper;
 
@@ -28,7 +28,6 @@ public class TransactionExpiryScheduler {
     public void markExpiredTransactions() {
         // 在 Java 中获取当前时间
         LocalDateTime now = LocalDateTime.now();
-
         String sql = """
         UPDATE transactionrecords 
         SET is_expired = TRUE

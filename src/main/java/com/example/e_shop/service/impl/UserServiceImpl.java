@@ -14,8 +14,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.e_shop.util.JwtUtil;
 import com.example.e_shop.util.ThreadLocalUtil;
 import com.example.e_shop.util.TypeConversionUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -35,11 +37,12 @@ import java.util.concurrent.TimeUnit;
  */
 
 @Service
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    private StringRedisTemplate redisTemplate;
+    private  StringRedisTemplate stringRedisTemplate;
     public Result register(UserDTO userDTO) {
         User user = new User();
         user.setEmail(userDTO.getEmail());
@@ -64,7 +67,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             claims.put(JwtClaimsConstant.EMAIL,user.getEmail());
             claims.put(JwtClaimsConstant.USERNAME,user.getName());
             claims.put(JwtClaimsConstant.USER_ID,user.getId());
+            ThreadLocalUtil.set(claims);
             String token= JwtUtil.generateToken(claims);
+            stringRedisTemplate.opsForValue().set("token",token);
             System.out.println(token);
             return  Result.success(MessageConstant.SUCCESS,token);
         }

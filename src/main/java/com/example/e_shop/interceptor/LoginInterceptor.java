@@ -9,7 +9,9 @@ import com.example.e_shop.util.JwtUtil;
 import com.example.e_shop.util.ThreadLocalUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
@@ -19,9 +21,10 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 @Component
 public class LoginInterceptor implements HandlerInterceptor {
 
@@ -46,11 +49,14 @@ public class LoginInterceptor implements HandlerInterceptor {
         }
         String path = request.getRequestURI();
         String token = request.getHeader("Authorization");
+        String redisToken=stringRedisTemplate.opsForValue().get("token");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7); // 去掉 "Bearer " 前缀
-            Map<String, Object> claims = JwtUtil.parseToken(token);
+            if(redisToken.equals(token))
+            {Map<String,Object> claims=new HashMap<>();
+            claims=JwtUtil.parseToken(token);
             ThreadLocalUtil.set(claims);
-            System.out.println("Token 验证成功，用户ID: " + claims.get("userId"));
+            }
         }
         // 获取 Spring 的 PathMatcher 实例
         PathMatcher pathMatcher = new AntPathMatcher();
@@ -59,18 +65,25 @@ public class LoginInterceptor implements HandlerInterceptor {
         List<String> allowedPaths = Arrays.asList(
                 "/user/register",
                 "/user/login",
-                "/user/info",
-                "/products/add",
-                "/products/list"
+                "/products/",
+                "/products/list",
+                "/products/details/{id}",
+                "/product/**"
         );
-//
-//        // 检查路径是否匹配
-//        boolean isAllowedPath = allowedPaths.stream()
-//                .anyMatch(pattern -> pathMatcher.match(pattern, path));
-//
-//        if(!isAllowedPath) {
-//            System.out.println("路径不匹配");
-//            return false;}
+        if(token==null||token.isEmpty()){
+            // 检查路径是否匹配
+            boolean isAllowedPath = allowedPaths.stream()
+                    .anyMatch(pattern -> pathMatcher.match(pattern, path));
+
+            if(!isAllowedPath) {
+                System.out.println("路径不匹配");
+                return false;}
+
+        }
+
+
+
+
         return true;
     }
 

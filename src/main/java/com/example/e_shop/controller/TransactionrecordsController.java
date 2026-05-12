@@ -25,7 +25,7 @@ public class TransactionrecordsController {
     TransactionrecordsService transactionrecordsService;
    @PostMapping("/offer")
    public Result addTransactionRecords(@RequestBody TransactionDTO transactionDTO){
-       System.out.println(transactionDTO.getHours());
+       System.out.println(transactionDTO.getProductId());
        return  transactionrecordsService.addTransactionRecords(transactionDTO);
    }
    @GetMapping("/get/{userId}/{otherUserId}")

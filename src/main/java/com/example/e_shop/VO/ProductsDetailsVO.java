@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class ProductsDetailsVO {
-
+    private Long  id;
     private String  name;
     private String  userName;
     private String imageUrl;
