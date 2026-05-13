@@ -2,6 +2,7 @@ package com.example.e_shop.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.e_shop.DTO.TransactionDTO;
+import com.example.e_shop.Lock.RedisDistributedLock;
 import com.example.e_shop.VO.TransactionVO;
 import com.example.e_shop.VO.UserVO;
 import com.example.e_shop.constant.JwtClaimsConstant;
@@ -17,18 +18,14 @@ import com.example.e_shop.service.TransactionrecordsService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.e_shop.util.ThreadLocalUtil;
 import com.example.e_shop.util.TypeConversionUtil;
-import org.apache.ibatis.transaction.Transaction;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.awt.desktop.SystemEventListener;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * <p>
@@ -38,6 +35,7 @@ import java.util.Objects;
  * @author e-shop
  * @since 2026-05-10
  */
+@Slf4j
 @Service
 public class TransactionrecordsServiceImpl extends ServiceImpl<TransactionrecordsMapper, Transactionrecords> implements TransactionrecordsService {
     @Autowired
@@ -46,6 +44,8 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
     ProductsMapper productsMapper;
     @Autowired
     UserMapper userMapper;
+    @Autowired
+    private RedisDistributedLock lock; //redis实现分布式锁
     public Result addTransactionRecords(TransactionDTO transactionDTO){
                  Transactionrecords transactionrecords=new Transactionrecords();
                  transactionrecords.setProductid(transactionDTO.getProductId());
@@ -53,12 +53,27 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
                  transactionrecords.setSellerid(transactionDTO.getSellerId());
                  transactionrecords.setAmount(transactionDTO.getAmount());
                  transactionrecords.setTransactiontime(LocalDateTime.now());
-                 transactionrecords.setTransactiondeadline(LocalDateTime.now().plusHours(transactionDTO.getHours()));
-                 if(transactionrecordsMapper.insert(transactionrecords)==0)
-                 {
-                     return Result.error();
+                 String locKey="locKey:"+transactionDTO.getProductId();
+                 String lockId= UUID.randomUUID().toString();
+                 try{
+                     if(lock.tryLock(locKey,lockId,10000)){
+                         transactionrecords.setTransactiondeadline(LocalDateTime.now().plusHours(transactionDTO.getHours()));
+                         transactionrecordsMapper.insert(transactionrecords);
+                         Thread.sleep(3000);
+                          return Result.success();
+                     }
+                     else {
+                         log.info("已被报价");
+                         throw new RuntimeException("获取锁失败");
+                     }
+
                  }
-                 return Result.success();
+                 catch (Exception e){}
+                 finally {
+                         lock.releaseLock(locKey,lockId);
+                 }
+
+                 return Result.error();
              }
 
     public Result<List<TransactionVO>> getTransactionRecords(Long userId,Long otherId){

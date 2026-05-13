@@ -49,12 +49,17 @@ public class LoginInterceptor implements HandlerInterceptor {
         }
         String path = request.getRequestURI();
         String token = request.getHeader("Authorization");
-        String redisToken=stringRedisTemplate.opsForValue().get("token");
         if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // 去掉 "Bearer " 前缀
+            token = token.substring(7);
+            Map<String,Object> claims = JwtUtil.parseToken(token);
+            String userName=claims.get(JwtClaimsConstant.USERNAME).toString();
+
+            String redisToken=stringRedisTemplate.opsForValue().get(userName);
+
             if(redisToken.equals(token))
-            {Map<String,Object> claims=new HashMap<>();
-            claims=JwtUtil.parseToken(token);
+            {log.info(redisToken);
+                Map<String,Object> claims1=new HashMap<>();
+            claims1=JwtUtil.parseToken(token);
             ThreadLocalUtil.set(claims);
             }
         }

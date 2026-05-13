@@ -38,6 +38,8 @@ public class Products implements Serializable {
     private String description;
 
     private LocalDateTime createdAt;
+    @TableField("isorder")
+    private Boolean isOrder;
 
     private LocalDateTime updatedAt;
 

@@ -69,7 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             claims.put(JwtClaimsConstant.USER_ID,user.getId());
             ThreadLocalUtil.set(claims);
             String token= JwtUtil.generateToken(claims);
-            stringRedisTemplate.opsForValue().set("token",token);
+            stringRedisTemplate.opsForValue().set(user.getName(),token);
             System.out.println(token);
             return  Result.success(MessageConstant.SUCCESS,token);
         }

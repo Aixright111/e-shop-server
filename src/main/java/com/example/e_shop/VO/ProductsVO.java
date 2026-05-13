@@ -20,6 +20,7 @@ public class ProductsVO {
     private String description;
 
     private LocalDateTime createdAt;
+    private Boolean isOrder;
 
     private Boolean show;
 

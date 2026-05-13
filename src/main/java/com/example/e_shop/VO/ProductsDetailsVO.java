@@ -15,6 +15,7 @@ public class ProductsDetailsVO {
     private String description;
     private LocalDateTime createdAt;
     private UserVO userVO;
+    private Boolean isOrder;
     private Long typeId;
     private Long detailView;
 }
