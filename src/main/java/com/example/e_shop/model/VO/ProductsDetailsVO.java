@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class ProductsDetailsVO {
@@ -18,4 +19,5 @@ public class ProductsDetailsVO {
     private Boolean isOrder;
     private Long typeId;
     private Long detailView;
+    private List<String> bannerUrls;
 }

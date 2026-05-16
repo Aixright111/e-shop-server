@@ -10,6 +10,7 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -38,6 +39,8 @@ public class Products implements Serializable {
     private String description;
 
     private LocalDateTime createdAt;
+
+
     @TableField("isorder")
     private Boolean isOrder;
 
@@ -48,7 +51,8 @@ public class Products implements Serializable {
     private String typeName;
     @TableField("typeid")
     private Long typeId;
-
+    @TableField(value = "banner_urls", typeHandler = com.example.e_shop.handler.StringListTypeHandler.class)
+    private List<String> bannerUrls;
     private Long userId;
 
     @TableField("detailviews")
