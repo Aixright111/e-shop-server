@@ -1,6 +1,6 @@
 package com.example.e_shop.service.impl;
 
-import com.example.e_shop.entity.Messages;
+import com.example.e_shop.model.entity.Messages;
 import com.example.e_shop.mapper.MessagesMapper;
 import com.example.e_shop.service.MessagesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

@@ -1,7 +1,7 @@
 package com.example.e_shop.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.e_shop.entity.Products;
+import com.example.e_shop.model.entity.Products;
 
 /**
  * <p>

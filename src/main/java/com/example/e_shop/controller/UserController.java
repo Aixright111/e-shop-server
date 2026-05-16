@@ -1,8 +1,8 @@
 package com.example.e_shop.controller;
 
-import com.example.e_shop.DTO.UserDTO;
-import com.example.e_shop.VO.UserVO;
-import com.example.e_shop.entity.User;
+import com.example.e_shop.model.DTO.UserDTO;
+import com.example.e_shop.model.VO.UserVO;
+import com.example.e_shop.model.entity.User;
 import com.example.e_shop.result.Result;
 import com.example.e_shop.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

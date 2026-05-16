@@ -1,4 +1,4 @@
-package com.example.e_shop.DTO;
+package com.example.e_shop.model.DTO;
 
 import lombok.Data;
 
@@ -9,4 +9,5 @@ public class GetProductsDTO {
  private Long userId;
  private String typeName;
  private Long typeId;
+ private String name;
 }

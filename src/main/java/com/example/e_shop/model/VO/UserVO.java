@@ -1,6 +1,5 @@
-package com.example.e_shop.VO;
+package com.example.e_shop.model.VO;
 
-import com.example.e_shop.entity.User;
 import lombok.Data;
 
 import java.time.LocalDateTime;

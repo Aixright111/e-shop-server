@@ -1,8 +1,8 @@
 package com.example.e_shop.service;
 
-import com.example.e_shop.DTO.UserDTO;
-import com.example.e_shop.VO.UserVO;
-import com.example.e_shop.entity.User;
+import com.example.e_shop.model.DTO.UserDTO;
+import com.example.e_shop.model.VO.UserVO;
+import com.example.e_shop.model.entity.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.example.e_shop.result.Result;
 

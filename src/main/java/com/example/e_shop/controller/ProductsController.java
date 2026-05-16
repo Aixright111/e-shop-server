@@ -1,12 +1,13 @@
 package com.example.e_shop.controller;
 
-import com.example.e_shop.DTO.AddProductsDTO;
-import com.example.e_shop.DTO.GetProductsDTO;
-import com.example.e_shop.DTO.UpdateProductsDTO;
-import com.example.e_shop.VO.ProductsVO;
+import com.example.e_shop.model.DTO.AddProductsDTO;
+import com.example.e_shop.model.DTO.GetProductsDTO;
+import com.example.e_shop.model.DTO.UpdateProductsDTO;
+import com.example.e_shop.model.VO.ProductsVO;
 import com.example.e_shop.result.PageResult;
 import com.example.e_shop.result.Result;
 import com.example.e_shop.service.ProductsService;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +29,7 @@ public class ProductsController {
         return productsService.addProducts(addProductsDTO);
     }
    @PostMapping("/list")
-    public Result<PageResult<ProductsVO>> getProducts(@RequestBody GetProductsDTO getProductsDTO){
+    public Result<PageResult<ProductsVO>> getProducts(@RequestBody @NotNull GetProductsDTO getProductsDTO){
         return productsService.getProducts(getProductsDTO);
    }
    @GetMapping("/details/{id}")

@@ -1,6 +1,6 @@
 package com.example.e_shop.service;
 
-import com.example.e_shop.entity.Messages;
+import com.example.e_shop.model.entity.Messages;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

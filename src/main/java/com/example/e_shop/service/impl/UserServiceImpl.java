@@ -1,12 +1,11 @@
 package com.example.e_shop.service.impl;
 
-import ch.qos.logback.core.util.MD5Util;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.e_shop.DTO.UserDTO;
-import com.example.e_shop.VO.UserVO;
+import com.example.e_shop.model.DTO.UserDTO;
+import com.example.e_shop.model.VO.UserVO;
 import com.example.e_shop.constant.JwtClaimsConstant;
 import com.example.e_shop.constant.MessageConstant;
-import com.example.e_shop.entity.User;
+import com.example.e_shop.model.entity.User;
 import com.example.e_shop.mapper.UserMapper;
 import com.example.e_shop.result.Result;
 import com.example.e_shop.service.UserService;
@@ -17,7 +16,6 @@ import com.example.e_shop.util.TypeConversionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
@@ -25,7 +23,6 @@ import org.springframework.util.DigestUtils;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * <p>

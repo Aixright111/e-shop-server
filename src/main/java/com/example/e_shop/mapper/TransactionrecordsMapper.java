@@ -1,7 +1,7 @@
 package com.example.e_shop.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.e_shop.entity.Transactionrecords;
+import com.example.e_shop.model.entity.Transactionrecords;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 

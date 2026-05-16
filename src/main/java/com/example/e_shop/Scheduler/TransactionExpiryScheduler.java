@@ -55,7 +55,7 @@ public class TransactionExpiryScheduler {
         if (updated > 0) {
             log.info("删除了 {} 个订单", updated);
         } else {
-            log.info("0个删除");
+            log.info("订单无删除");
         }
     }
 }

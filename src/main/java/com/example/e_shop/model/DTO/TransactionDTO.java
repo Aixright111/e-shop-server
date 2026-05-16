@@ -1,4 +1,4 @@
-package com.example.e_shop.DTO;
+package com.example.e_shop.model.DTO;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;

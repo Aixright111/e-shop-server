@@ -1,6 +1,6 @@
 package com.example.e_shop.mapper;
 
-import com.example.e_shop.entity.User;
+import com.example.e_shop.model.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 

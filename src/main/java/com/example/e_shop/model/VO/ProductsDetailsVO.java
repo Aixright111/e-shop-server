@@ -1,4 +1,4 @@
-package com.example.e_shop.VO;
+package com.example.e_shop.model.VO;
 
 import lombok.Data;
 

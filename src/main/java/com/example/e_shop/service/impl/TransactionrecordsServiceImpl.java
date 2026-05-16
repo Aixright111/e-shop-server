@@ -1,15 +1,15 @@
 package com.example.e_shop.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.example.e_shop.DTO.TransactionDTO;
+import com.example.e_shop.model.DTO.TransactionDTO;
 import com.example.e_shop.Lock.RedisDistributedLock;
-import com.example.e_shop.VO.TransactionVO;
-import com.example.e_shop.VO.UserVO;
+import com.example.e_shop.model.VO.TransactionVO;
+import com.example.e_shop.model.VO.UserVO;
 import com.example.e_shop.constant.JwtClaimsConstant;
 import com.example.e_shop.constant.MessageConstant;
-import com.example.e_shop.entity.Products;
-import com.example.e_shop.entity.Transactionrecords;
-import com.example.e_shop.entity.User;
+import com.example.e_shop.model.entity.Products;
+import com.example.e_shop.model.entity.Transactionrecords;
+import com.example.e_shop.model.entity.User;
 import com.example.e_shop.mapper.ProductsMapper;
 import com.example.e_shop.mapper.TransactionrecordsMapper;
 import com.example.e_shop.mapper.UserMapper;
@@ -21,6 +21,9 @@ import com.example.e_shop.util.TypeConversionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -37,6 +40,7 @@ import java.util.*;
  */
 @Slf4j
 @Service
+@CacheConfig(cacheNames = "orderCache")
 public class TransactionrecordsServiceImpl extends ServiceImpl<TransactionrecordsMapper, Transactionrecords> implements TransactionrecordsService {
     @Autowired
     TransactionrecordsMapper transactionrecordsMapper;
@@ -46,6 +50,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
     UserMapper userMapper;
     @Autowired
     private RedisDistributedLock lock; //redis实现分布式锁
+   @CacheEvict(cacheNames = "orderCacher",allEntries = true)
     public Result addTransactionRecords(TransactionDTO transactionDTO){
                  Transactionrecords transactionrecords=new Transactionrecords();
                  transactionrecords.setProductid(transactionDTO.getProductId());
@@ -59,6 +64,9 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
                      if(lock.tryLock(locKey,lockId,10000)){
                          transactionrecords.setTransactiondeadline(LocalDateTime.now().plusHours(transactionDTO.getHours()));
                          transactionrecordsMapper.insert(transactionrecords);
+                         Products products=productsMapper.selectById(transactionDTO.getProductId());
+                         products.setShow(false);
+                         productsMapper.updateById(products);
                          Thread.sleep(3000);
                           return Result.success();
                      }
@@ -75,7 +83,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
 
                  return Result.error();
              }
-
+    @Cacheable(key = "#userId+'-'+#otherId")
     public Result<List<TransactionVO>> getTransactionRecords(Long userId,Long otherId){
 
         List<Transactionrecords> transactionrecordsList=  transactionrecordsMapper.getTransactionsBetweenUsers(userId,otherId);
@@ -95,6 +103,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
         } ).toList();
         return Result.success(MessageConstant.SUCCESS,transactionVOList);
     }
+    @Cacheable(key = "'seller'+'-'+#userId")
     public Result<List<TransactionVO>> getSellerRecords(Long userId){
         QueryWrapper queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("sellerid",userId);
@@ -115,6 +124,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
                 } ).toList();
         return Result.success(transactionVOList);
     }
+    @Cacheable(key = "'buyer'+'-'+#userId")
     public Result<List<TransactionVO>> getBuyerRecords(Long userId){
         QueryWrapper queryWrapper=new QueryWrapper<>();
         queryWrapper.eq("buyerid",userId);
@@ -135,6 +145,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
                 } ).toList();
         return Result.success(transactionVOList);
     }
+    @CacheEvict(cacheNames = "orderCacher",allEntries = true)
     public Result commitOrders(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         transactionrecords.setIsCommit(true);
@@ -144,6 +155,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
         transactionrecordsMapper.updateById(transactionrecords);
         return Result.success(MessageConstant.SUCCESS);
     }
+    @CacheEvict(cacheNames = "orderCacher",allEntries = true)
     public Result rejectOrders(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         transactionrecords.setIsReject(true);
@@ -153,6 +165,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
         transactionrecordsMapper.updateById(transactionrecords);
         return Result.success(MessageConstant.SUCCESS);
     }
+    @CacheEvict(cacheNames = "orderCacher",allEntries = true)
     public Result payOrders(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         transactionrecords.setIsPay(true);
@@ -160,6 +173,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
         transactionrecordsMapper.updateById(transactionrecords);
         return Result.success(MessageConstant.SUCCESS);
     }
+    @Cacheable(key = "'Detail'+'-'+#id")
     public Result<TransactionVO> getOrdersDetail(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         Long productsId=transactionrecords.getProductid();

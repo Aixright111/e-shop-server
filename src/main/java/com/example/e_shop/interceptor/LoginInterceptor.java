@@ -57,8 +57,7 @@ public class LoginInterceptor implements HandlerInterceptor {
             String redisToken=stringRedisTemplate.opsForValue().get(userName);
 
             if(redisToken.equals(token))
-            {log.info(redisToken);
-                Map<String,Object> claims1=new HashMap<>();
+            {Map<String,Object> claims1=new HashMap<>();
             claims1=JwtUtil.parseToken(token);
             ThreadLocalUtil.set(claims);
             }

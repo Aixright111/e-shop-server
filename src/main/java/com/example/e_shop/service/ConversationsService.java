@@ -1,6 +1,6 @@
 package com.example.e_shop.service;
 
-import com.example.e_shop.entity.Conversations;
+import com.example.e_shop.model.entity.Conversations;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;

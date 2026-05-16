@@ -1,15 +1,14 @@
 package com.example.e_shop.controller;
 
-import com.example.e_shop.DTO.SendMessageRequest;
+import com.example.e_shop.model.DTO.SendMessageRequest;
 import com.example.e_shop.constant.JwtClaimsConstant;
-import com.example.e_shop.entity.Conversations;
-import com.example.e_shop.entity.Messages;
+import com.example.e_shop.model.entity.Conversations;
+import com.example.e_shop.model.entity.Messages;
 import com.example.e_shop.result.Result;
-import com.example.e_shop.service.ChatService;
+import com.example.e_shop.service.impl.ChatService;
 import com.example.e_shop.service.ConversationsService;
 import com.example.e_shop.util.ThreadLocalUtil;
 import com.example.e_shop.util.TypeConversionUtil;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;

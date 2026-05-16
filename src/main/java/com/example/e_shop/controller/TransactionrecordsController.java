@@ -1,10 +1,9 @@
 package com.example.e_shop.controller;
 
-import com.example.e_shop.DTO.TransactionDTO;
-import com.example.e_shop.VO.TransactionVO;
+import com.example.e_shop.model.DTO.TransactionDTO;
+import com.example.e_shop.model.VO.TransactionVO;
 import com.example.e_shop.result.Result;
 import com.example.e_shop.service.TransactionrecordsService;
-import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

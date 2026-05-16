@@ -3,17 +3,17 @@ package com.example.e_shop.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.example.e_shop.DTO.AddProductsDTO;
-import com.example.e_shop.DTO.GetProductsDTO;
-import com.example.e_shop.DTO.UpdateProductsDTO;
-import com.example.e_shop.VO.ProductsDetailsVO;
-import com.example.e_shop.VO.ProductsVO;
-import com.example.e_shop.VO.UserVO;
+import com.example.e_shop.model.DTO.AddProductsDTO;
+import com.example.e_shop.model.DTO.GetProductsDTO;
+import com.example.e_shop.model.DTO.UpdateProductsDTO;
+import com.example.e_shop.model.VO.ProductsDetailsVO;
+import com.example.e_shop.model.VO.ProductsVO;
+import com.example.e_shop.model.VO.UserVO;
 import com.example.e_shop.constant.JwtClaimsConstant;
 import com.example.e_shop.constant.MessageConstant;
-import com.example.e_shop.entity.Products;
-import com.example.e_shop.entity.Transactionrecords;
-import com.example.e_shop.entity.User;
+import com.example.e_shop.model.entity.Products;
+import com.example.e_shop.model.entity.Transactionrecords;
+import com.example.e_shop.model.entity.User;
 import com.example.e_shop.mapper.ProductsMapper;
 import com.example.e_shop.mapper.TransactionrecordsMapper;
 import com.example.e_shop.mapper.UserMapper;
@@ -26,6 +26,9 @@ import com.example.e_shop.util.TypeConversionUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +45,7 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@CacheConfig(cacheNames = "productsCache")
 public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> implements ProductsService {
            @Autowired
            ProductsMapper productsMapper;
@@ -49,6 +53,8 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
            UserMapper userMapper;
            @Autowired
     TransactionrecordsMapper transactionrecordsMapper;
+
+    @CacheEvict(cacheNames = "productsCache", allEntries = true)
            public Result addProducts(AddProductsDTO addProductsDTO){
         Map<String, Object> map = ThreadLocalUtil.get();
         Object userIdObj = map.get(JwtClaimsConstant.USER_ID);
@@ -67,7 +73,8 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
 
         else  return  Result.success(MessageConstant.ADD+MessageConstant.SUCCESS);
     }
-    public Result<PageResult<ProductsVO>> getProducts(GetProductsDTO getProductsDTO){
+    @Cacheable(key = "T(com.example.e_shop.util.CacheKeyUtil).getProductsKey(#getProductsDTO)")
+        public Result<PageResult<ProductsVO>> getProducts(GetProductsDTO getProductsDTO){
         Page<Products> page=new Page<>(getProductsDTO.getPageNum(),getProductsDTO.getPageSize());
         QueryWrapper queryWrapper=new QueryWrapper<>();
         // 分页查询
@@ -76,6 +83,9 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
         if(getProductsDTO.getTypeId()!=null){
             queryWrapper.eq("typeId",getProductsDTO.getTypeId());
+        }
+        if(getProductsDTO.getName()!=null){
+            queryWrapper.like("name",getProductsDTO.getName());
         }
         IPage<Products> productsIPage = productsMapper.selectPage(page, queryWrapper);
         if (productsIPage.getRecords().size() == 0) {
@@ -92,6 +102,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
                 ).toList();
         return Result.success(new PageResult<>(productsIPage.getTotal(), productsVOList));
     }
+    @Cacheable(key = "#productId")
     public Result getProductsDetails(Long productId){
 
         Products products=productsMapper.selectById(productId);
@@ -100,7 +111,6 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
 
         else {
-            productsMapper.incrementDetailView(products);
             User user=userMapper.selectById(products.getUserId());
             UserVO userVO=new UserVO();
 
@@ -114,6 +124,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
 
     }
+    @CacheEvict(cacheNames = "productsCache", allEntries = true)
     public Result deleteProducts(Long productId){
          Products products=productsMapper.selectById(productId);
         QueryWrapper queryWrapper =new QueryWrapper<>();
@@ -135,6 +146,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
          }
          else return Result.success(MessageConstant.SUCCESS,productsImageUrl);
     }
+    @CacheEvict(cacheNames = "productsCache", allEntries = true)
     public Result updateProducts(UpdateProductsDTO updateProductsDTO){
                Products products = productsMapper.selectById(updateProductsDTO.getId());
                QueryWrapper queryWrapper =new QueryWrapper<>();

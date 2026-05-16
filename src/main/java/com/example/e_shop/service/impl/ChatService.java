@@ -1,17 +1,18 @@
-package com.example.e_shop.service;
+package com.example.e_shop.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.example.e_shop.entity.Conversations;
-import com.example.e_shop.entity.Messages;
+import com.example.e_shop.model.entity.Conversations;
+import com.example.e_shop.model.entity.Messages;
 import com.example.e_shop.mapper.ConversationsMapper;
 import com.example.e_shop.mapper.MessagesMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
-
+@CacheConfig(cacheNames = "conversationCache")
 @Service
 public class ChatService extends ServiceImpl<ConversationsMapper, Conversations> {
 
