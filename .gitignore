@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+# 忽略 Docker 镜像打包文件
+*.tar
