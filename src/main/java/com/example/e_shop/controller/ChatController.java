@@ -57,6 +57,24 @@ public class ChatController {
         chatService.markMessagesAsRead(conversationId, currentUserId);
         return Result.success();
     }
+    // 获取用户所有未读消息总数
+    @GetMapping("/unread/total")
+    public Result<Long> getTotalUnread() {
+        Map<String,Object> claims = ThreadLocalUtil.get();
+        Long userId = TypeConversionUtil.toLong(claims.get(JwtClaimsConstant.USER_ID));
+        long count = chatService.countAllUnreadMessages(userId);
+        return Result.success(count);
+    }
+
+    // 获取每个对话的未读消息数
+    @GetMapping("/unread/conversations")
+    public Result<List<Map<String, Object>>> getUnreadByConversation() {
+        Map<String,Object> claims = ThreadLocalUtil.get();
+        Long userId = TypeConversionUtil.toLong(claims.get(JwtClaimsConstant.USER_ID));
+        List<Map<String, Object>> counts = chatService.countUnreadByConversation(userId);
+        return Result.success(counts);
+    }
+
     @GetMapping("/conversations")
     public Result<List<Conversations>> list() {
         Map<String, Object> claims = ThreadLocalUtil.get();

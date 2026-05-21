@@ -6,15 +6,32 @@ spring:
   data:
     redis:
       database: 1
-      host: localhost
+      host: redis
       port: 6379
-      password:
+      password: ${REDIS_PASSWORD:}
 
   datasource:
-    url: jdbc:postgresql://aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres
-    username: postgres.lnviiveexzabxkhrkmyn
-    password: WOSHILEI123a
+    url: ${DATASOURCE_URL:jdbc:postgresql://aws-1-ap-northeast-1.pooler.supabase.com:5432/postgres}
+    username: ${DATASOURCE_USERNAME:postgres.lnviiveexzabxkhrkmyn}
+    password: ${DATASOURCE_PASSWORD:WOSHILEI123a}
     driver-class-name: org.postgresql.Driver
+
+  # QQ邮箱配置（发送验证码）
+  mail:
+    host: ${MAIL_HOST:smtp.qq.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:1849772238@qq.com}
+    password: ${MAIL_PASSWORD:owagrzpehspuecbf}
+    protocol: smtps
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+
+# AI 配置（DashScope / 阿里云通义千问）
+dashscope:
+  api-key: ${DASHSCOPE_API_KEY:sk-bf9d2f8a8cef49a88c720084a8d26644}
 
 mybatis-plus:
   configuration:

@@ -24,11 +24,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.e_shop.util.ThreadLocalUtil;
 import com.example.e_shop.util.TypeConversionUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,7 +55,6 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
            UserMapper userMapper;
            @Autowired
     TransactionrecordsMapper transactionrecordsMapper;
-
     @CacheEvict(cacheNames = "productsCache", allEntries = true)
            public Result addProducts(AddProductsDTO addProductsDTO){
         Map<String, Object> map = ThreadLocalUtil.get();
@@ -67,6 +68,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         System.out.println(addProductsDTO.getDescription());
         products.setDescription(addProductsDTO.getDescription());
         products.setUserId(userId);
+        products.setBeEmbedding(false);
         if(productsMapper.insert(products)==0){
             return Result.error(MessageConstant.ADD+MessageConstant.FAILED);
         }
@@ -87,6 +89,20 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         if(getProductsDTO.getName()!=null){
             queryWrapper.like("name",getProductsDTO.getName());
         }
+        String sortField = getProductsDTO.getSortField();
+        String sortOrder = getProductsDTO.getSortOrder();
+
+        if ("price".equals(sortField)) {
+            if ("DESC".equalsIgnoreCase(sortOrder)) {
+                queryWrapper.orderByDesc("price");
+            } else {
+                queryWrapper.orderByAsc("price");  // 默认升序
+            }
+        }
+            if("detailviews".equals(sortField))
+            {
+                queryWrapper.orderByDesc("detailviews");
+            }
         IPage<Products> productsIPage = productsMapper.selectPage(page, queryWrapper);
         if (productsIPage.getRecords().size() == 0) {
             return Result.success(MessageConstant.DATA_NOT_FOUND, new PageResult<>(0L, null));
@@ -102,6 +118,7 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
                 ).toList();
         return Result.success(new PageResult<>(productsIPage.getTotal(), productsVOList));
     }
+
     @Cacheable(key = "#productId")
     public Result getProductsDetails(Long productId){
 
@@ -113,7 +130,6 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         else {
             User user=userMapper.selectById(products.getUserId());
             UserVO userVO=new UserVO();
-
             BeanUtils.copyProperties(user,userVO);
             userVO.setAvatarUrl(user.getUserImage());
             ProductsDetailsVO productsDetailsVO=new ProductsDetailsVO();
@@ -124,7 +140,10 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
         }
 
     }
-    @CacheEvict(cacheNames = "productsCache", allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "productsCache", allEntries = true),
+            @CacheEvict(cacheNames = "orderCache", allEntries = true)
+    })
     public Result deleteProducts(Long productId){
          Products products=productsMapper.selectById(productId);
         QueryWrapper queryWrapper =new QueryWrapper<>();
@@ -140,7 +159,6 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
 
         }
          String productsImageUrl=products.getImageUrl();
-
          if(productsMapper.deleteById(productId)==0){
              return Result.error(MessageConstant.FAILED);
          }
@@ -163,10 +181,53 @@ public class ProductsServiceImpl extends ServiceImpl<ProductsMapper, Products> i
               }
                if(products!=null){
                    BeanUtils.copyProperties(updateProductsDTO,products);
+                   products.setBeEmbedding(false);
                }
               if( productsMapper.updateById(products)==0)
                return  Result.error();
                    else
                        return Result.success();
+    }
+    public Result<PageResult<ProductsVO>> aiGetProducts(GetProductsDTO getProductsDTO){
+        Page<Products> page=new Page<>(getProductsDTO.getPageNum(),getProductsDTO.getPageSize());
+        QueryWrapper queryWrapper=new QueryWrapper<>();
+        // 分页查询
+        if(getProductsDTO.getUserId()!=null){
+            queryWrapper.eq("user_id",getProductsDTO.getUserId());
+        }
+        if(getProductsDTO.getTypeId()!=null){
+            queryWrapper.eq("typeId",getProductsDTO.getTypeId());
+        }
+        if(getProductsDTO.getName()!=null){
+            queryWrapper.like("name",getProductsDTO.getName());
+        }
+        String sortField = getProductsDTO.getSortField();
+        String sortOrder = getProductsDTO.getSortOrder();
+
+        if ("price".equals(sortField)) {
+            if ("DESC".equalsIgnoreCase(sortOrder)) {
+                queryWrapper.orderByDesc("price");
+            } else {
+                queryWrapper.orderByAsc("price");  // 默认升序
+            }
+        }
+        if("detailviews".equals(sortField))
+        {
+            queryWrapper.orderByDesc("detailviews");
+        }
+        IPage<Products> productsIPage = productsMapper.selectPage(page, queryWrapper);
+        if (productsIPage.getRecords().size() == 0) {
+            return Result.success(MessageConstant.DATA_NOT_FOUND, new PageResult<>(0L, null));
+        }
+        // 转换成 ProductsVO
+        List<ProductsVO> productsVOList = productsIPage.getRecords().stream()
+                .map(products -> {
+                            ProductsVO productsVO = new ProductsVO();
+                            BeanUtils.copyProperties(products, productsVO);
+                            return productsVO;
+
+                        }
+                ).toList();
+        return Result.success(new PageResult<>(productsIPage.getTotal(), productsVOList));
     }
 }

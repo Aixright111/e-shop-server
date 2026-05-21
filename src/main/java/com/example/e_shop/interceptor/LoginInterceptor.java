@@ -72,7 +72,10 @@ public class LoginInterceptor implements HandlerInterceptor {
                 "/products/",
                 "/products/list",
                 "/products/details/{id}",
-                "/product/**"
+                "/product/**",
+                "/user/send-code",
+                "/user/reset-password",
+                "/products//aiList"
         );
         if(token==null||token.isEmpty()){
             // 检查路径是否匹配

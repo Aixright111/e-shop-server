@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -50,7 +51,10 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
     UserMapper userMapper;
     @Autowired
     private RedisDistributedLock lock; //redis实现分布式锁
-   @CacheEvict(cacheNames = "orderCacher",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "productsCache", allEntries = true),
+            @CacheEvict(cacheNames = "orderCache", allEntries = true)
+    })
     public Result addTransactionRecords(TransactionDTO transactionDTO){
                  Transactionrecords transactionrecords=new Transactionrecords();
                  transactionrecords.setProductid(transactionDTO.getProductId());
@@ -63,9 +67,12 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
                  try{
                      if(lock.tryLock(locKey,lockId,10000)){
                          transactionrecords.setTransactiondeadline(LocalDateTime.now().plusHours(transactionDTO.getHours()));
-                         transactionrecordsMapper.insert(transactionrecords);
                          Products products=productsMapper.selectById(transactionDTO.getProductId());
-                         products.setShow(false);
+                         if(products.getIsOrder()!=null&&products.getIsOrder()){
+                             throw new RuntimeException("已有报价");
+                         }
+                         transactionrecordsMapper.insert(transactionrecords);
+                         products.setIsOrder(true);
                          productsMapper.updateById(products);
                          Thread.sleep(3000);
                           return Result.success();
@@ -83,7 +90,7 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
 
                  return Result.error();
              }
-    @Cacheable(key = "#userId+'-'+#otherId")
+
     public Result<List<TransactionVO>> getTransactionRecords(Long userId,Long otherId){
 
         List<Transactionrecords> transactionrecordsList=  transactionrecordsMapper.getTransactionsBetweenUsers(userId,otherId);
@@ -145,7 +152,10 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
                 } ).toList();
         return Result.success(transactionVOList);
     }
-    @CacheEvict(cacheNames = "orderCacher",allEntries = true)
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "orderCache", allEntries = true),
+            @CacheEvict(cacheNames = "productsCache", allEntries = true)
+    })
     public Result commitOrders(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         transactionrecords.setIsCommit(true);
@@ -155,17 +165,23 @@ public class TransactionrecordsServiceImpl extends ServiceImpl<Transactionrecord
         transactionrecordsMapper.updateById(transactionrecords);
         return Result.success(MessageConstant.SUCCESS);
     }
-    @CacheEvict(cacheNames = "orderCacher",allEntries = true)
+
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "orderCache", allEntries = true),
+            @CacheEvict(cacheNames = "productsCache", allEntries = true)
+    })
     public Result rejectOrders(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         transactionrecords.setIsReject(true);
         Products products=productsMapper.selectById(transactionrecords.getProductid());
         products.setShow(true);
+        products.setIsOrder(false);
         productsMapper.updateById(products);
         transactionrecordsMapper.updateById(transactionrecords);
         return Result.success(MessageConstant.SUCCESS);
     }
-    @CacheEvict(cacheNames = "orderCacher",allEntries = true)
+
+    @CacheEvict(cacheNames = "orderCache", allEntries = true)
     public Result payOrders(Long id){
         Transactionrecords transactionrecords=transactionrecordsMapper.selectById(id);
         transactionrecords.setIsPay(true);

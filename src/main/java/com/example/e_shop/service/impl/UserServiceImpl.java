@@ -41,11 +41,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private  StringRedisTemplate stringRedisTemplate;
     public Result register(UserDTO userDTO) {
+        log.debug("收到注册请求: email={}, username={}", userDTO.getEmail(), userDTO.getUsername());
+
+        // 校验邮箱验证码
+        String redisKey = "verify_code:" + userDTO.getEmail();
+        String cachedCode = stringRedisTemplate.opsForValue().get(redisKey);
+        log.debug("验证码校验: email={}, 输入code={}, Redis中code={}, key={}",
+                userDTO.getEmail(), userDTO.getCode(), cachedCode, redisKey);
+        if (cachedCode == null) {
+            log.warn("验证码已过期: email={}", userDTO.getEmail());
+            return Result.error("验证码已过期，请重新获取");
+        }
+        if (!cachedCode.equals(userDTO.getCode())) {
+            log.warn("验证码错误: email={}, 输入={}, 正确={}", userDTO.getEmail(), userDTO.getCode(), cachedCode);
+            return Result.error("验证码错误");
+        }
+        // 验证通过，删除已使用的验证码
+        stringRedisTemplate.delete(redisKey);
+        log.debug("验证码校验通过，已删除Redis中的验证码: key={}", redisKey);
+
         User user = new User();
         user.setEmail(userDTO.getEmail());
         String passwordMD5 = DigestUtils.md5DigestAsHex(userDTO.getPassword().getBytes());
         user.setPassword(passwordMD5);
         user.setName(userDTO.getUsername());
+
         if (userMapper.insert(user) == 0)
             return Result.error(MessageConstant.REGISTER + MessageConstant.FAILED);
         else
@@ -99,10 +119,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         else return Result.success(MessageConstant.SUCCESS);
     }
+    public Result resetPassword(String email, String code, String password) {
+        log.debug("收到密码重置请求: email={}", email);
+
+        // 校验验证码
+        String redisKey = "verify_code:" + email;
+        String cachedCode = stringRedisTemplate.opsForValue().get(redisKey);
+        log.debug("验证码校验: email={}, 输入code={}, Redis中code={}", email, code, cachedCode);
+        if (cachedCode == null) {
+            return Result.error("验证码已过期，请重新获取");
+        }
+        if (!cachedCode.equals(code)) {
+            return Result.error("验证码错误");
+        }
+
+        // 验证通过，删除已使用的验证码
+        stringRedisTemplate.delete(redisKey);
+
+        // 通过邮箱查找用户并更新密码
+        User user = userMapper.selectOne(new QueryWrapper<User>().eq("email", email));
+        if (user == null) {
+            log.warn("用户不存在: email={}", email);
+            return Result.error("该邮箱未注册");
+        }
+        user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+        user.setUpdatedAt(LocalDateTime.now());
+        if (userMapper.updateById(user) == 0) {
+            log.error("密码更新失败: email={}", email);
+            return Result.error("密码重置失败");
+        }
+        log.info("密码重置成功: email={}", email);
+        return Result.success("密码重置成功");
+    }
+
     public Result<UserVO> getUserInfoById(Long userId){
         UserVO userVO=new UserVO();
         User user=userMapper.selectById(userId);
-        if (user!=null)System.out.println("没获取userbyid");
         BeanUtils.copyProperties(user,userVO);
         userVO.setAvatarUrl(user.getUserImage());
         if(userVO!=null)

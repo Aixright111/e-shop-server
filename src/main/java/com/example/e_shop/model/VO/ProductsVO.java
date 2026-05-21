@@ -1,5 +1,6 @@
 package com.example.e_shop.model.VO;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -25,6 +26,8 @@ public class ProductsVO {
     private Boolean show;
 
     private String typeName;
+
+    private float[] embedding;
 
     private Long detailView;
 

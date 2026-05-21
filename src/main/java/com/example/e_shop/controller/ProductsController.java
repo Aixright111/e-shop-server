@@ -45,4 +45,8 @@ public class ProductsController {
     public  Result updateProducts(@RequestBody UpdateProductsDTO updateProductsDTO){
         return productsService.updateProducts(updateProductsDTO);
    }
+    @PostMapping("/aiList")
+    public Result<PageResult<ProductsVO>> aiGetProducts(@RequestBody @NotNull GetProductsDTO getProductsDTO){
+        return productsService.getProducts(getProductsDTO);
+    }
 }

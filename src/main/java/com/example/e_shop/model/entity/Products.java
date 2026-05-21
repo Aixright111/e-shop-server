@@ -58,4 +58,11 @@ public class Products implements Serializable {
     @TableField("detailviews")
 
     private Long detailView;
+
+    /** 商品向量嵌入（pgvector，1024 维），用于语义搜索 */
+    @TableField(value = "embedding", typeHandler = com.example.e_shop.handler.Vector1024TypeHandler.class)
+    private float[] embedding;
+
+    @TableField(value = "beembedding")
+    private  boolean beEmbedding;
 }
